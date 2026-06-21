@@ -149,6 +149,8 @@ O handler de mensagens em background está registrado em `index.js` e exige a pe
 
 ## Integração com Face Access
 
+Sistema de câmeras: **https://github.com/aksbarbosa/reconhecimento_facial**
+
 Veja `INTEGRATION.md` para:
 - SQL completo de criação das tabelas
 - Código da Supabase Edge Function
