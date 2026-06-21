@@ -49,9 +49,10 @@ export async function getFCMToken(): Promise<string | null> {
 export async function saveTokenToSupabase(userId: string): Promise<void> {
   const token = await getFCMToken();
   if (!token) return;
-  await supabase
-    .from('fcm_tokens')
-    .upsert({user_id: userId, token}, {onConflict: 'user_id,token'});
+  // Remove o token de qualquer outro usuário antes de salvar
+  // Garante que cada dispositivo físico notifica apenas o usuário logado
+  await supabase.from('fcm_tokens').delete().eq('token', token).neq('user_id', userId);
+  await supabase.from('fcm_tokens').upsert({user_id: userId, token}, {onConflict: 'user_id,token'});
 }
 
 export async function removeTokenFromSupabase(): Promise<void> {
@@ -71,7 +72,7 @@ function parseEvent(remoteMessage: any): RecognitionEvent {
   }
 
   return {
-    id: data.id ?? String(Date.now()),
+    id: data.event_id || data.id || String(Date.now()),
     person_id: data.person_id ?? 'unknown',
     person_name: data.person_name ?? remoteMessage.notification?.title ?? 'Desconhecido',
     location: location ?? {
