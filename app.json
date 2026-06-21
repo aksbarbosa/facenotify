@@ -1,0 +1,14 @@
+{
+  "name": "FaceNotify",
+  "displayName": "FaceNotify",
+  "expo": {
+    "name": "FaceNotify",
+    "slug": "facenotify",
+    "extra": {
+      "eas": {
+        "projectId": "a6a1a2b7-5ba1-43c0-9c45-0992a5c3b113"
+      }
+    },
+    "owner": "filipebarbosa"
+  }
+}
