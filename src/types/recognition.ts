@@ -13,4 +13,5 @@ export interface RecognitionEvent {
   location: RecognitionLocation;
   timestamp: string;
   confidence: number;
+  access_granted: boolean;
 }

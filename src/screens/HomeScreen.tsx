@@ -79,6 +79,17 @@ function buildMarkedDates(start: string, end: string) {
 }
 
 // ─── Componentes ─────────────────────────────────────────────────────────────
+function AccessBadge({granted}: {granted: boolean}) {
+  return (
+    <View style={[badge.wrap, {backgroundColor: granted ? '#f0fdf4' : '#fef2f2'}]}>
+      <View style={[badge.dot, {backgroundColor: granted ? '#16a34a' : '#dc2626'}]} />
+      <Text style={[badge.text, {color: granted ? '#16a34a' : '#dc2626'}]}>
+        {granted ? 'Liberado' : 'Negado'}
+      </Text>
+    </View>
+  );
+}
+
 function ConfidenceBadge({score}: {score: number}) {
   const pct   = Math.round(score * 100);
   const color = pct >= 90 ? '#16a34a' : pct >= 75 ? '#d97706' : '#dc2626';
@@ -119,7 +130,10 @@ function EventCard({event, onPress, isLast}: {event: RecognitionEvent; onPress:(
           <Text style={styles.cardLocation} numberOfLines={1}>
             {event.location.city}, {event.location.state}
           </Text>
-          <ConfidenceBadge score={event.confidence} />
+          <View style={styles.cardBadges}>
+            <AccessBadge granted={event.access_granted} />
+            <ConfidenceBadge score={event.confidence} />
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -377,6 +391,7 @@ const styles = StyleSheet.create({
   cardTime:   {fontSize:12, color: TEXT3, marginLeft:8, flexShrink:0},
   cardCamera: {fontSize:13, color: TEXT2},
   cardLocation:{fontSize:12, color: TEXT3, flex:1},
+  cardBadges: {flexDirection:'row', gap:4, alignItems:'center'},
   emptyWrap:  {alignItems:'center', paddingTop:80, gap:10},
   emptyIcon:  {fontSize:40},
   emptyText:  {fontSize:15, color: TEXT3, textAlign:'center'},

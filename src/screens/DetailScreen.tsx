@@ -47,6 +47,14 @@ export default function DetailScreen({route}: {route: any}) {
           {new Date(event.timestamp).toLocaleString('pt-BR', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'})}
         </Text>
 
+        {/* Badge acesso */}
+        <View style={[styles.heroBadge, {backgroundColor: event.access_granted ? '#f0fdf4' : '#fef2f2', marginBottom: 8}]}>
+          <View style={[styles.heroBadgeDot, {backgroundColor: event.access_granted ? '#16a34a' : '#dc2626'}]} />
+          <Text style={[styles.heroBadgeText, {color: event.access_granted ? '#16a34a' : '#dc2626'}]}>
+            {event.access_granted ? 'Acesso liberado' : 'Acesso negado'}
+          </Text>
+        </View>
+
         {/* Badge confiança */}
         {(() => {
           const pct   = Math.round(event.confidence * 100);
@@ -79,6 +87,8 @@ export default function DetailScreen({route}: {route: any}) {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>RECONHECIMENTO</Text>
         <View style={styles.card}>
+          <InfoRow label="Acesso"      value={event.access_granted ? '✅ Liberado' : '⚠️ Negado'} />
+          <View style={styles.div} />
           <InfoRow label="Data e hora" value={formatDate(event.timestamp)} />
           <View style={styles.div} />
           <InfoRow label="Confiança"   value={confidenceLabel(event.confidence)} />

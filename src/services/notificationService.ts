@@ -83,6 +83,7 @@ function parseEvent(remoteMessage: any): RecognitionEvent {
     },
     timestamp: data.timestamp ?? new Date().toISOString(),
     confidence: data.confidence ? parseFloat(data.confidence) : 0,
+    access_granted: data.access_granted !== 'false',
   };
 }
 

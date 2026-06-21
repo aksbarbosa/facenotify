@@ -24,6 +24,7 @@ function mapRow(row: any): RecognitionEvent {
     },
     timestamp: row.timestamp,
     confidence: row.confidence ?? 0,
+    access_granted: row.access_granted ?? true,
   };
 }
 
