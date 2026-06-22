@@ -115,15 +115,16 @@ const badge = StyleSheet.create({
 });
 
 function EventCard({event, onPress, isLast}: {event: RecognitionEvent; onPress:()=>void; isLast:boolean}) {
-  const color = themeAvatarColor(event.person_name);
+  const color       = themeAvatarColor(event.person_name);
+  const accentColor = event.access_granted ? '#16a34a' : '#dc2626';
   return (
     <TouchableOpacity
       style={[styles.card, {height: CARD_HEIGHT}, !isLast && styles.cardBorder]}
       onPress={onPress}
       activeOpacity={0.6}>
-      <View style={[styles.cardAccent, {backgroundColor: color}]} />
-      <View style={[styles.cardAvatar, {backgroundColor: color + '22'}]}>
-        <Text style={[styles.cardAvatarText, {color}]}>
+      <View style={[styles.cardAccent, {backgroundColor: accentColor}]} />
+      <View style={[styles.cardAvatar, {backgroundColor: accentColor + '22'}]}>
+        <Text style={[styles.cardAvatarText, {color: accentColor}]}>
           {event.person_name.charAt(0).toUpperCase()}
         </Text>
       </View>
@@ -165,6 +166,7 @@ export default function HomeScreen() {
   const {state: userState, subscribe: subscribeUser} = useUser();
   const [search, setSearch]            = useState('');
   const [filterDep, setFilterDep]      = useState('Todos');
+  const [filterAccess, setFilterAccess]= useState<'Todos'|'Liberado'|'Negado'>('Todos');
   const [dateStart, setDateStart]      = useState('');
   const [dateEnd,   setDateEnd]        = useState('');
   const [sheetVisible, setSheetVisible]= useState(false);
@@ -227,10 +229,11 @@ export default function HomeScreen() {
     const ms = search===''||
       e.person_name.toLowerCase().includes(search.toLowerCase())||
       e.location.city.toLowerCase().includes(search.toLowerCase());
-    const md = filterDep==='Todos'||e.person_name===filterDep;
-    const day= e.timestamp.split('T')[0];
-    const mdt= !dateStart||(day>=dateStart&&day<=(dateEnd||dateStart));
-    return ms&&md&&mdt;
+    const md  = filterDep==='Todos'||e.person_name===filterDep;
+    const ma  = filterAccess==='Todos'||(filterAccess==='Liberado'?e.access_granted:!e.access_granted);
+    const day = localDateStr(new Date(e.timestamp));
+    const mdt = !dateStart||(day>=dateStart&&day<=(dateEnd||dateStart));
+    return ms&&md&&ma&&mdt;
   });
 
   const sections   = groupByDate(filtered);
@@ -238,7 +241,7 @@ export default function HomeScreen() {
   const dateLabel  = dateStart
     ? (dateEnd&&dateEnd!==dateStart ? `${dateStart} → ${dateEnd}` : dateStart)
     : '';
-  const hasFilter  = filterDep!=='Todos'||!!dateStart;
+  const hasFilter  = filterDep!=='Todos'||filterAccess!=='Todos'||!!dateStart;
 
   return (
     <View style={styles.container} {...swipePan.panHandlers}>
@@ -292,7 +295,7 @@ export default function HomeScreen() {
             <Text style={styles.emptyIcon}>📭</Text>
             <Text style={styles.emptyText}>Nenhum reconhecimento encontrado</Text>
             {hasFilter && (
-              <TouchableOpacity onPress={()=>{setFilterDep('Todos');setDateStart('');setDateEnd('');}}>
+              <TouchableOpacity onPress={()=>{setFilterDep('Todos');setFilterAccess('Todos');setDateStart('');setDateEnd('');}}>
                 <Text style={[styles.emptyAction, {color: PRIMARY}]}>Limpar filtros</Text>
               </TouchableOpacity>
             )}
@@ -311,6 +314,22 @@ export default function HomeScreen() {
             <Text style={styles.sheetTitle}>Filtrar</Text>
           </View>
           <View style={styles.sheetBody} {...bodyPan.panHandlers}>
+            <View style={styles.sheetSection}>
+              <Text style={styles.sheetLabel}>Acesso</Text>
+              <View style={styles.chips}>
+                {(['Todos','Liberado','Negado'] as const).map(opt => {
+                  const isActive = filterAccess === opt;
+                  const chipColor = opt==='Liberado' ? '#16a34a' : opt==='Negado' ? '#dc2626' : PRIMARY;
+                  return (
+                    <TouchableOpacity key={opt}
+                      style={[styles.chip, isActive && {backgroundColor: chipColor}]}
+                      onPress={()=>setFilterAccess(opt)} activeOpacity={0.7}>
+                      <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{opt}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
             <View style={styles.sheetSection}>
               <Text style={styles.sheetLabel}>Dependente</Text>
               <View style={styles.chips}>
@@ -357,7 +376,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.sheetFooter}>
             <TouchableOpacity style={styles.clearBtn}
-              onPress={()=>{setFilterDep('Todos');setDateStart('');setDateEnd('');}}>
+              onPress={()=>{setFilterDep('Todos');setFilterAccess('Todos');setDateStart('');setDateEnd('');}}>
               <Text style={styles.clearBtnText}>Limpar tudo</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.applyBtn, {backgroundColor: PRIMARY}]} onPress={closeSheet}>
