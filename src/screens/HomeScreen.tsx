@@ -45,9 +45,16 @@ export function relativeTime(iso: string): string {
   return new Date(iso).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
 }
 
+function localDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function sectionLabel(d: string): string {
-  const today     = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const today     = localDateStr(new Date());
+  const yesterday = localDateStr(new Date(Date.now() - 86400000));
   if (d === today)     return 'Hoje';
   if (d === yesterday) return 'Ontem';
   return new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
@@ -56,7 +63,7 @@ function sectionLabel(d: string): string {
 function groupByDate(evts: RecognitionEvent[]) {
   const map: Record<string, RecognitionEvent[]> = {};
   for (const e of evts) {
-    const day = e.timestamp.split('T')[0];
+    const day = localDateStr(new Date(e.timestamp));
     if (!map[day]) map[day] = [];
     map[day].push(e);
   }

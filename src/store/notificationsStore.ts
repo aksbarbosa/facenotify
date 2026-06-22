@@ -29,6 +29,8 @@ function mapRow(row: any): RecognitionEvent {
 }
 
 export async function initStore(userId: string): Promise<void> {
+  cleanupStore();
+
   const {data} = await supabase
     .from('recognition_events')
     .select('*')

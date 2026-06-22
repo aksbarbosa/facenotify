@@ -27,14 +27,18 @@ export default function App() {
   useEffect(() => subscribeUser(), [subscribeUser]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({data: {session: s}}) => {
-      setSession(s);
+    const applySession = (s: any) => {
+      setSession(prev => {
+        if (prev?.user?.id === s?.user?.id) return prev;
+        return s;
+      });
       setLoading(false);
-    });
+    };
+
+    supabase.auth.getSession().then(({data: {session: s}}) => applySession(s));
 
     const {data: {subscription}} = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setLoading(false);
+      applySession(s);
     });
 
     return () => subscription.unsubscribe();
